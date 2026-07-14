@@ -27,7 +27,17 @@ def home():
         "message": "SDC Patient REST API Running"
     }
 
+@app.get("/patient")
+def patient():
 
+    print("Reading JSON")
+
+    with open(json_path, "r") as f:
+        data = json.load(f)
+
+    print("Current data:", data)
+
+    return data
 @app.get("/patient")
 def patient():
 
