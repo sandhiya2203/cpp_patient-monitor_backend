@@ -14,8 +14,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
 
-JSON_FILE = "/home/sandiya/Downloads/sdclib-master/patient_data.json"
+json_path = os.path.join(
+    os.path.dirname(__file__),
+    "patient_data.json"
+)
 
 
 @app.get("/")
