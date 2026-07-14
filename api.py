@@ -14,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-import os
 
 json_path = os.path.join(
     os.path.dirname(__file__),
@@ -25,33 +24,30 @@ json_path = os.path.join(
 @app.get("/")
 def home():
     return {
-        "message":"SDC Patient REST API Running"
+        "message": "SDC Patient REST API Running"
     }
 
 
 @app.get("/patient")
 def patient():
 
-    print("Looking for:", JSON_FILE)
+    print("Looking for:", json_path)
 
-
-    if not os.path.exists(JSON_FILE):
+    if not os.path.exists(json_path):
 
         print("JSON NOT FOUND")
 
         return {
-            "status":"Disconnected",
-            "heart_rate":0,
-            "blood_pressure":"0/0",
-            "spo2":"0"
+            "status": "Disconnected",
+            "heart_rate": 0,
+            "blood_pressure": "0/0",
+            "spo2": "0"
         }
 
 
     print("JSON FOUND")
 
-
-    with open(JSON_FILE,"r") as f:
-
+    with open(json_path, "r") as f:
         data = json.load(f)
 
     return data
