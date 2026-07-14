@@ -5,7 +5,6 @@ import os
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,21 +26,11 @@ def home():
         "message": "SDC Patient REST API Running"
     }
 
+
 @app.get("/patient")
 def patient():
 
-    print("Reading JSON")
-
-    with open(json_path, "r") as f:
-        data = json.load(f)
-
-    print("Current data:", data)
-
-    return data
-@app.get("/patient")
-def patient():
-
-    print("Looking for:", json_path)
+    print("Reading:", json_path)
 
     if not os.path.exists(json_path):
 
@@ -55,9 +44,10 @@ def patient():
         }
 
 
-    print("JSON FOUND")
-
     with open(json_path, "r") as f:
         data = json.load(f)
+
+
+    print("Current data:", data)
 
     return data
