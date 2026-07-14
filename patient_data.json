@@ -1,6 +1,6 @@
 {
-"status":"Starting",
-"heart_rate":116,
-"blood_pressure":"--",
-"spo2":"--"
+    "status": "Starting",
+    "heart_rate": 0,
+    "blood_pressure": "0/0",
+    "spo2": 0
 }
