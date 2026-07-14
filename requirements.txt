@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+sdc11073==2.3.0
+lxml
+requests
