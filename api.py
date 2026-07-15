@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from datetime import datetime
 import threading
 import time
-import os
 
 
 app = FastAPI()
+
+
+# -----------------------------
+# CORS for Vercel frontend
+# -----------------------------
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,8 +20,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-LAST_UPDATE_FILE = "last_update.txt"
 
+
+
+# -----------------------------
+# Patient Data
+# -----------------------------
 
 patient_data = {
 
@@ -35,35 +44,56 @@ patient_data = {
 }
 
 
+
+# Last received data time
+
+last_update_time = 0
+
+
+# Disconnect timeout
+
 TIMEOUT = 10
 
 
 
+# -----------------------------
+# Background connection checker
+# -----------------------------
+
 def check_connection():
+
+    global last_update_time
+
 
     while True:
 
-        try:
 
-            if os.path.exists(LAST_UPDATE_FILE):
-
-                with open(LAST_UPDATE_FILE, "r") as f:
-
-                    last = float(f.read())
+        if last_update_time != 0:
 
 
-                if time.time() - last > TIMEOUT:
+            elapsed = time.time() - last_update_time
+
+
+            print(
+                "Seconds since last data:",
+                int(elapsed)
+            )
+
+
+
+            if elapsed > TIMEOUT:
+
+
+                if patient_data["status"] != "Disconnected":
+
 
                     patient_data["status"] = "Disconnected"
 
+
                     print(
-                        "NO DATA - DISCONNECTED"
+                        "PROVIDER DISCONNECTED"
                     )
 
-
-        except Exception as e:
-
-            print(e)
 
 
         time.sleep(2)
@@ -72,13 +102,22 @@ def check_connection():
 
 
 
+# -----------------------------
+# Start background thread
+# -----------------------------
+
 @app.on_event("startup")
 def startup_event():
 
+
     thread = threading.Thread(
+
         target=check_connection,
+
         daemon=True
+
     )
+
 
     thread.start()
 
@@ -86,8 +125,17 @@ def startup_event():
 
 
 
+
+# -----------------------------
+# Receive data from C++
+# -----------------------------
+
 @app.post("/update")
 def update(data: dict):
+
+
+    global last_update_time
+
 
 
     print("DATA FROM C++")
@@ -96,72 +144,90 @@ def update(data: dict):
 
 
 
-    received_status = data.get(
-        "status",
-        "Connected"
+
+    # Provider alive
+
+    patient_data["status"] = "Connected"
+
+
+
+    # Update values
+
+
+    patient_data["heartRate"] = data.get(
+
+        "heartRate",
+
+        patient_data["heartRate"]
+
     )
 
 
-    # Every received metric means connected
 
-    if received_status == "Connected":
+    patient_data["bloodPressure"] = data.get(
 
+        "bloodPressure",
 
-        patient_data["status"] = "Connected"
+        patient_data["bloodPressure"]
 
-
-
-        patient_data["heartRate"] = data.get(
-            "heartRate",
-            patient_data["heartRate"]
-        )
+    )
 
 
 
-        patient_data["bloodPressure"] = data.get(
-            "bloodPressure",
-            patient_data["bloodPressure"]
-        )
+    patient_data["spo2"] = data.get(
+
+        "spo2",
+
+        patient_data["spo2"]
+
+    )
 
 
 
-        patient_data["spo2"] = data.get(
-            "spo2",
-            patient_data["spo2"]
-        )
+
+
+    # Update timestamp only when data arrives
+
+
+    now = datetime.now()
 
 
 
-        now = datetime.now()
+    patient_data["date"] = now.strftime(
 
+        "%d-%m-%Y"
 
-        patient_data["date"] = now.strftime(
-            "%d-%m-%Y"
-        )
-
-
-        patient_data["time"] = now.strftime(
-            "%H:%M:%S"
-        )
+    )
 
 
 
-        # save last received time
+    patient_data["time"] = now.strftime(
 
-        with open(LAST_UPDATE_FILE,"w") as f:
+        "%H:%M:%S"
 
-            f.write(
-                str(time.time())
-            )
+    )
+
+
+
+
+
+    # Store last received time
+
+
+    last_update_time = time.time()
+
 
 
 
 
     return {
 
-        "status":"updated",
 
-        "data":patient_data
+        "status": "updated",
+
+
+        "data": patient_data
+
 
     }
 
@@ -169,17 +235,12 @@ def update(data: dict):
 
 
 
+# -----------------------------
+# Frontend reads this
+# -----------------------------
+
 @app.get("/patient")
 def patient():
 
+
     return patient_data
-
-
-
-
-
-
-
-
-
-
