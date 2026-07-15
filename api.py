@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 
 from datetime import datetime
 import threading
@@ -174,18 +172,8 @@ def patient():
 
 
 
-@app.get("/")
-def home():
-
-    return FileResponse(
-        "static/index.html"
-    )
 
 
 
 
-app.mount(
-    "/static",
-    StaticFiles(directory="static"),
-    name="static"
-)
+
