@@ -29,7 +29,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
-
+#include <curl/curl.h>
 #include "SDCLib/SDCLibrary.h"
 #include "SDCLib/Data/SDC/SDCConsumer.h"
 #include "SDCLib/Data/SDC/SDCConsumerConnectionLostHandler.h"
@@ -71,7 +71,67 @@ const std::string HANDLE_SYS = "numeric.ch0.vmd1";
 
 const std::string HANDLE_BP_STRING = "string.ch1.vmd0";
 const std::string HANDLE_SPO2_STRING = "spo2.ch1.vmd0";
+void sendToAPI()
+{
+    CURL *curl = curl_easy_init();
 
+    if(curl)
+    {
+        json data;
+
+        data["status"] = status;
+        data["heartRate"] = heartRate;
+        data["bloodPressure"] = bloodPressure;
+        data["spo2"] = spo2;
+
+
+        std::string jsonData = data.dump();
+
+
+        struct curl_slist *headers = NULL;
+
+        headers = curl_slist_append(
+            headers,
+            "Content-Type: application/json"
+        );
+
+
+        curl_easy_setopt(
+            curl,
+            CURLOPT_URL,
+            "http://localhost:8000/update"
+        );
+
+
+        curl_easy_setopt(
+            curl,
+            CURLOPT_HTTPHEADER,
+            headers
+        );
+
+
+        curl_easy_setopt(
+            curl,
+            CURLOPT_POSTFIELDS,
+            jsonData.c_str()
+        );
+
+
+        CURLcode res = curl_easy_perform(curl);
+
+
+        if(res != CURLE_OK)
+        {
+            std::cout 
+            << "API Error: "
+            << curl_easy_strerror(res)
+            << std::endl;
+        }
+
+
+        curl_easy_cleanup(curl);
+    }
+}
 class NumericMetricEventHandler
     : public SDCConsumerMDStateHandler<NumericMetricState>
 {
@@ -103,6 +163,7 @@ void onStateChanged(const NumericMetricState& state) override
     }
 
     updatePatientJson();
+    sendToAPI();
 }
     
 };
@@ -151,6 +212,7 @@ void onStateChanged(const StringMetricState& state) override
 
     // call after releasing mutex
     updatePatientJson();
+    sendToAPI();
 }
     
 };
