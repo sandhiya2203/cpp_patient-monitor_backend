@@ -1,30 +1,82 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import json
-import os
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
 
-JSON_FILE = "/home/sandiya/Downloads/sdclib-master/build/bin/patient_data1.json"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+patient_data = {
+
+    "status": "Disconnected",
+    "heartRate": 0,
+    "bloodPressure": "0/0",
+    "spo2": 0
+
+}
 
 
-@app.get("/")
-def home():
-    return FileResponse("static/index.html")
+
+@app.post("/update")
+def update(data: dict):
+
+    print("DATA RECEIVED FROM C++:")
+    print(data)
+
+    patient_data["status"] = data.get(
+        "status",
+        patient_data["status"]
+    )
+
+    patient_data["heartRate"] = data.get(
+        "heartRate",
+        patient_data["heartRate"]
+    )
+
+    patient_data["bloodPressure"] = data.get(
+        "bloodPressure",
+        patient_data["bloodPressure"]
+    )
+
+    patient_data["spo2"] = data.get(
+        "spo2",
+        patient_data["spo2"]
+    )
+
+
+    return {
+        "message":"updated",
+        "data":patient_data
+    }
+
 
 
 @app.get("/patient")
 def patient():
 
-    if not os.path.exists(JSON_FILE):
-        return {
-            "status": "JSON FILE NOT FOUND"
-        }
+    return patient_data
 
-    with open(JSON_FILE, "r") as f:
-        data = json.load(f)
 
-    print("Sending:", data)
 
-    return data
+@app.get("/")
+def home():
+
+    return FileResponse(
+        "static/index.html"
+    )
+
+
+
+app.mount(
+    "/static",
+    StaticFiles(directory="static"),
+    name="static"
+)
