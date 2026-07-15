@@ -99,7 +99,7 @@ void sendToAPI()
         curl_easy_setopt(
             curl,
             CURLOPT_URL,
-            "http://localhost:8000/update"
+"https://cpppatient-monitorbackend-production.up.railway.app/update"
         );
 
 
