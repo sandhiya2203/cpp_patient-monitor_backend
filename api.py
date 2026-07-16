@@ -52,7 +52,7 @@ last_update_time = 0
 
 # Disconnect timeout
 
-TIMEOUT = 10
+TIMEOUT = 16
 
 
 
