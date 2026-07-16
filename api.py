@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import threading
 import time
 
@@ -189,7 +189,7 @@ def update(data: dict):
     # Update timestamp only when data arrives
 
 
-    now = datetime.now()
+ now = datetime.now(ZoneInfo("Asia/Kolkata"))
 
 
 
