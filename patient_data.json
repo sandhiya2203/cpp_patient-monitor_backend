@@ -1,6 +1,10 @@
 {
-    "bloodPressure": "113/76",
-    "heartRate": 66.0,
-    "spo2": 98.0,
-    "status": "Disconnected"
-}
+    "age": 45,
+    "bedId": "ICU-01",
+    "bloodPressure": "116/70",
+    "gender": "Male",
+    "heartRate": 91.0,
+    "patientId": "P001",
+    "patientName": "John",
+    "spo2": 97.0,
+    "status": "Connected"
