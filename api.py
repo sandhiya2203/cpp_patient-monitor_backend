@@ -189,7 +189,7 @@ def update(data: dict):
     # Update timestamp only when data arrives
 
 
- now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
 
 
 
